@@ -1,0 +1,46 @@
+---
+title: "Drug_Delivery_Lab"
+output: html_document
+date: "2023-10-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+#Data Import
+small <- read_excel("/Users/clairenottman/Documents/Drug_Delivery_Lab/drug_delivery_lab_results.xlsx", sheet = "small")
+large <- read_excel("/Users/clairenottman/Documents/Drug_Delivery_Lab/drug_delivery_lab_results.xlsx", sheet = "large")
+df <- read_excel("/Users/clairenottman/Documents/Drug_Delivery_Lab/drug_delivery_lab_results.xlsx", sheet = "T_test")
+
+#SEM calculated in excel
+se_small = c(0.02740864, 0.040542039, 0.032099421)
+se_large = c(0.061466819, 0.15408433, 0.153645251)
+
+```
+
+```{r}
+#Concentration vs Time Plot
+ggplot() + geom_line(small, mapping = aes(x = Time_avg, y = Concentration_avg, color = "small")) + geom_line(large, mapping = aes(x = Time_avg, y = Concentration_avg, color = "large")) + geom_point(small, mapping = aes(x = Time_avg, y = Concentration_avg, color = "small")) + geom_errorbar(small, mapping = aes(x = Time_avg, y = Concentration_avg, ymin = Concentration_avg - se_small, ymax = Concentration_avg + se_small, color = "small"), width = .7) + geom_errorbar(large, mapping = aes(x = Time_avg, y = Concentration_avg, ymin = Concentration_avg - se_large, ymax = Concentration_avg + se_large, color = "large"), width = .7) + geom_point(large, mapping = aes(x = Time_avg, y = Concentration_avg, color = "large")) + ggtitle("Concentration vs. Time") + theme(panel.background = element_blank())+theme(panel.background = element_blank())+ theme(axis.line = element_line(size = 1, colour = "black", linetype=1))+ theme(legend.key=element_blank())+theme(plot.title = element_text(hjust = 0.5))+ theme(text=element_text(size=8, family="sans"))+theme(axis.line.x.bottom=element_line(size=0.5), axis.line.y.left=element_line(size=0.5))+ ylab("Concentration (M)")+xlab("Time (min)") + theme(legend.title=element_blank())
+ggsave("release_profiles.png")
+```
+
+```{r}
+#T Test
+t1 <- filter(df, timepoint == "30")
+t2 <- filter(df, timepoint == "60")
+t3 <- filter(df, timepoint == "90")
+
+t.test(concentration ~ size, data = filter(df, timepoint == "30"))
+t.test(concentration ~ size, data = filter(df, timepoint == "60"))
+t.test(concentration ~ size, data = filter(df, timepoint == "90"))
+
+```
+
